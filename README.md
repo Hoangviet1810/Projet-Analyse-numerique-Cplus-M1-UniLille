@@ -116,4 +116,4 @@ project/
 └── README.md
 ```
 
-
+![Dashboard](images/dashboard_analyse_numerique.png)
