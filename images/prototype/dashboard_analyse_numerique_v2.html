@@ -1,0 +1,301 @@
+
+<h2 class="sr-only">Dashboard analyse numérique C++ — thème bordeaux et or — Poisson 1D, équation de la chaleur, Black-Scholes, méthodes itératives PCG.</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.db{background:#1a0a0f;color:#f0e6d3;font-family:var(--font-sans);padding:0;width:100%;}
+.hdr{background:#2a0d15;border-bottom:2px solid #8b1a2e;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;}
+.hdr-title{font-size:15px;font-weight:500;color:#f5c842;}
+.hdr-sub{font-size:11px;color:#c4a882;}
+.body{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:10px;}
+.row2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 10px 10px;}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 10px 10px;}
+.card{background:#2a0d15;border:1px solid #4a1525;border-radius:8px;padding:12px;overflow:hidden;}
+.card-accent-gold{border-top:3px solid #f5c842;}
+.card-accent-rose{border-top:3px solid #e05c7a;}
+.card-accent-amber{border-top:3px solid #e8943a;}
+.card-accent-teal{border-top:3px solid #3ecfa8;}
+.card-accent-blue{border-top:3px solid #5b9ef5;}
+.card-accent-purple{border-top:3px solid #9b72f5;}
+.sec-label{font-size:9px;font-weight:500;color:#7a4a5a;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.card-title{font-size:11px;font-weight:500;color:#f5c842;margin-bottom:8px;}
+.big-num{font-size:28px;font-weight:500;color:#f5c842;line-height:1;}
+.big-sub{font-size:10px;color:#a07060;margin-top:3px;}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-radius:4px;background:#1a0a0f;margin-bottom:4px;}
+.kv-label{font-size:11px;color:#a07060;}
+.kv-val{font-size:12px;font-weight:500;color:#f5c842;}
+.kv-val-rose{color:#e05c7a;}
+.kv-val-teal{color:#3ecfa8;}
+.kv-val-amber{color:#e8943a;}
+.pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;}
+.pill-gold{background:#3a2200;color:#f5c842;border:1px solid #f5c842;}
+.pill-rose{background:#2a0015;color:#e05c7a;border:1px solid #e05c7a;}
+.pill-teal{background:#002a20;color:#3ecfa8;border:1px solid #3ecfa8;}
+.pill-amber{background:#2a1200;color:#e8943a;border:1px solid #e8943a;}
+.pill-blue{background:#001a30;color:#5b9ef5;border:1px solid #5b9ef5;}
+.bar-track{background:#0f0509;border-radius:3px;height:8px;width:100%;overflow:hidden;margin:2px 0;}
+.bar-fill{height:8px;border-radius:3px;}
+.mini-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.mini-label{font-size:10px;color:#a07060;}
+.iter-num{font-size:11px;font-weight:500;}
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.struct-item{display:flex;align-items:baseline;gap:6px;padding:3px 0;border-bottom:1px solid #2a1020;}
+.struct-name{font-size:11px;font-weight:500;}
+.struct-desc{font-size:10px;color:#7a4a5a;}
+.legend-row{display:flex;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#a07060;}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.cake-domain{border:2px solid #4a1525;border-radius:4px;padding:8px;position:relative;height:80px;background:#0f0509;}
+.cake-bar{position:absolute;left:20%;right:20%;top:35%;height:30%;background:#e8943a;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#3a1a00;font-weight:500;}
+.cake-top{position:absolute;top:4px;right:6px;font-size:9px;color:#e05c7a;}
+.cake-bot{position:absolute;bottom:4px;right:6px;font-size:9px;color:#3ecfa8;}
+.alpha-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #2a1020;}
+.alpha-val{font-size:13px;font-weight:500;color:#f5c842;}
+.alpha-desc{font-size:10px;color:#a07060;}
+.convergence-table{width:100%;}
+.convergence-table td{font-size:10px;padding:3px 4px;border-bottom:1px solid #2a1020;}
+.convergence-table .ct-beta{color:#e05c7a;font-weight:500;}
+.convergence-table .ct-ord{color:#3ecfa8;}
+.convergence-table .ct-param{color:#a07060;}
+.convergence-table th{font-size:9px;color:#7a4a5a;padding:2px 4px;text-transform:uppercase;letter-spacing:.06em;}
+.summary-circle{width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sum-card{background:#1a0a0f;border-radius:6px;padding:8px;text-align:center;}
+.sum-pct{font-size:16px;font-weight:500;}
+.sum-name{font-size:9px;color:#7a4a5a;margin-top:2px;}
+</style>
+
+<div class="db">
+
+  <div class="hdr">
+    <div class="hdr-title"><i class="ti ti-chart-dots" style="font-size:14px;margin-right:6px;" aria-hidden="true"></i>Dashboard — Projet analyse numérique avec C++</div>
+    <div class="hdr-sub">Master 1 Mathématiques &amp; Applications · Université de Lille · 2025–2026</div>
+  </div>
+
+  <div class="body">
+
+    <div class="card card-accent-gold">
+      <div class="sec-label">Partie 1 — Poisson 1D</div>
+      <div class="big-num">LDL<sup style="font-size:16px;">T</sup></div>
+      <div class="big-sub">Factorisation &amp; résolution profil</div>
+      <div style="margin:10px 0 6px;font-size:10px;color:#7a4a5a;">Résultats clés</div>
+      <div class="kv"><span class="kv-label">N max testé</span><span class="kv-val">65 536</span></div>
+      <div class="kv"><span class="kv-label">Ordre exp. β (α=0)</span><span class="kv-val-rose">≈ 0.943</span></div>
+      <div class="kv"><span class="kv-label">Constante C (α=0)</span><span class="kv-val">3.874</span></div>
+      <div class="kv"><span class="kv-label">Ordre exp. β (α=10)</span><span class="kv-val-rose">≈ 0.904</span></div>
+      <div class="kv"><span class="kv-label">Ordre théorique</span><span class="kv-val-teal">O(h²) asy.</span></div>
+      <div style="margin-top:10px;font-size:10px;color:#7a4a5a;margin-bottom:4px;">Convergence εN vs N (α=0, log-log)</div>
+      <div style="position:relative;width:100%;height:80px;"><canvas id="c1" role="img" aria-label="Convergence Poisson log-log">Convergence Poisson 1D.</canvas></div>
+    </div>
+
+    <div class="card card-accent-rose">
+      <div class="sec-label">Partie 2 — Équation de la chaleur</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <span class="pill pill-teal">Euler Explicite</span>
+        <span class="pill pill-amber">Euler Implicite</span>
+      </div>
+      <div style="font-size:10px;color:#7a4a5a;margin-bottom:5px;">Erreur max vs N (T=1)</div>
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-dot" style="background:#3ecfa8;"></div>Explicite</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#e8943a;"></div>Implicite</div>
+      </div>
+      <div style="position:relative;width:100%;height:95px;"><canvas id="c2" role="img" aria-label="Erreur chaleur explicite vs implicite">Données chaleur.</canvas></div>
+      <div style="display:flex;gap:4px;margin-top:8px;justify-content:center;">
+        <div style="text-align:center;flex:1;background:#1a0a0f;border-radius:4px;padding:6px;">
+          <div style="font-size:10px;color:#7a4a5a;">β explicite</div>
+          <div style="font-size:14px;font-weight:500;color:#3ecfa8;">1.738</div>
+        </div>
+        <div style="text-align:center;flex:1;background:#1a0a0f;border-radius:4px;padding:6px;">
+          <div style="font-size:10px;color:#7a4a5a;">β implicite</div>
+          <div style="font-size:14px;font-weight:500;color:#e8943a;">1.766</div>
+        </div>
+        <div style="text-align:center;flex:1;background:#1a0a0f;border-radius:4px;padding:6px;">
+          <div style="font-size:10px;color:#7a4a5a;">stabilité</div>
+          <div style="font-size:11px;font-weight:500;color:#f5c842;">k=h (impl)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-accent-amber">
+      <div class="sec-label">Partie 3 — Black-Scholes</div>
+      <div class="big-num" style="color:#e8943a;">13.35 <span style="font-size:14px;">€</span></div>
+      <div class="big-sub">Prix option call @ S=10 000 €</div>
+      <div class="two-col" style="margin:8px 0;">
+        <div><div style="font-size:9px;color:#7a4a5a;">Strike K(x)</div><div class="kv-val-amber" style="font-size:12px;font-weight:500;">0.95·x</div></div>
+        <div><div style="font-size:9px;color:#7a4a5a;">Volatilité σ</div><div style="color:#f5c842;font-size:12px;font-weight:500;">20%</div></div>
+        <div><div style="font-size:9px;color:#7a4a5a;">Maturité T</div><div style="color:#e05c7a;font-size:12px;font-weight:500;">365 j</div></div>
+        <div><div style="font-size:9px;color:#7a4a5a;">L (espace)</div><div style="color:#5b9ef5;font-size:12px;font-weight:500;">10 000</div></div>
+        <div><div style="font-size:9px;color:#7a4a5a;">N mailles</div><div style="color:#3ecfa8;font-size:12px;font-weight:500;">200</div></div>
+        <div><div style="font-size:9px;color:#7a4a5a;">Schéma</div><div style="color:#9b72f5;font-size:11px;font-weight:500;">Simpl</div></div>
+      </div>
+      <div style="font-size:10px;color:#7a4a5a;margin-bottom:4px;">Profil payoff h(x) = max(x−K, 0)</div>
+      <div style="position:relative;width:100%;height:70px;"><canvas id="c3" role="img" aria-label="Profil prix option call Black-Scholes">Prix option.</canvas></div>
+    </div>
+
+  </div>
+
+  <div class="row2">
+
+    <div class="card card-accent-teal">
+      <div class="sec-label">Partie 4 — Méthodes de gradient</div>
+      <div class="card-title">Steepest descent vs gradient fixe</div>
+      <div class="mini-row"><span class="mini-label">Méthode</span><span class="mini-label">α</span><span class="mini-label" style="min-width:60px;text-align:right;">Itérations</span></div>
+      <div class="mini-row"><span class="mini-label">Pas fixe j=1</span><span class="mini-label">0.003125</span><span class="iter-num" style="color:#a07060;min-width:60px;text-align:right;">150 (max)</span></div>
+      <div class="mini-row"><span class="mini-label">Pas fixe j=3</span><span class="mini-label">0.009375</span><span class="iter-num" style="color:#e8943a;min-width:60px;text-align:right;">122</span></div>
+      <div class="mini-row" style="background:#1a0a0f;padding:3px 4px;border-radius:4px;"><span class="mini-label" style="color:#f5c842;">Pas fixe j=5</span><span class="mini-label" style="color:#f5c842;">0.015625</span><span class="iter-num" style="color:#f5c842;min-width:60px;text-align:right;">72 ✓</span></div>
+      <div class="mini-row"><span class="mini-label">Pas fixe j=6</span><span class="mini-label">0.01875</span><span class="iter-num" style="color:#e05c7a;min-width:60px;text-align:right;">150 (div)</span></div>
+      <div class="mini-row" style="background:#002a20;padding:3px 4px;border-radius:4px;"><span class="mini-label" style="color:#3ecfa8;font-weight:500;">Steepest desc.</span><span class="mini-label" style="color:#3ecfa8;">adaptatif</span><span class="iter-num" style="color:#3ecfa8;min-width:60px;text-align:right;">66 ★</span></div>
+      <div style="position:relative;width:100%;height:70px;margin-top:8px;"><canvas id="c4" role="img" aria-label="Comparaison itérations gradient">Gradient comparaison.</canvas></div>
+    </div>
+
+    <div class="card card-accent-blue">
+      <div class="sec-label">Partie 4 — Méthode PCG (N=20)</div>
+      <div class="card-title">Gradient conjugué préconditionné</div>
+      <div style="font-size:10px;color:#7a4a5a;margin-bottom:6px;">Itérations (max 260)</div>
+
+      <div style="font-size:9px;color:#5b9ef5;margin-bottom:3px;">ρ = 1 (Laplacien standard)</div>
+      <div class="mini-row"><span class="mini-label">C = I</span><span class="iter-num" style="color:#e05c7a;">62</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:24%;background:#e05c7a;"></div></div>
+      <div class="mini-row"><span class="mini-label">C = diag(A)</span><span class="iter-num" style="color:#e8943a;">59</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:23%;background:#e8943a;"></div></div>
+      <div class="mini-row"><span class="mini-label">C = IC(0)</span><span class="iter-num" style="color:#3ecfa8;">23</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:9%;background:#3ecfa8;"></div></div>
+
+      <div style="font-size:9px;color:#9b72f5;margin:8px 0 3px;">ρ variable (gâteau)</div>
+      <div class="mini-row"><span class="mini-label">C = I</span><span class="iter-num" style="color:#e05c7a;">248</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:95%;background:#e05c7a;"></div></div>
+      <div class="mini-row"><span class="mini-label">C = diag(A)</span><span class="iter-num" style="color:#e8943a;">83</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:32%;background:#e8943a;"></div></div>
+      <div class="mini-row"><span class="mini-label">C = IC(0)</span><span class="iter-num" style="color:#3ecfa8;">26</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:10%;background:#3ecfa8;"></div></div>
+      <div style="font-size:9px;color:#3ecfa8;margin-top:6px;">IC(0) réduit les itérations d'un facteur ~10 (ρ variable)</div>
+    </div>
+
+    <div class="card card-accent-purple">
+      <div class="sec-label">Partie 4 (Bonus) — Problème inverse</div>
+      <div class="card-title">Cuisson optimale du gâteau</div>
+      <div class="cake-domain">
+        <div class="cake-top">Résistance haut T<sub>D</sub>=0°C</div>
+        <div class="cake-bar">Gâteau G [0.2,0.8]×[0.3,0.4]</div>
+        <div class="cake-bot">Résistance bas T<sub>D</sub>=200°C</div>
+      </div>
+      <div style="margin-top:8px;">
+        <div class="alpha-row"><div><div style="font-size:9px;color:#7a4a5a;">α_bas</div><div class="alpha-val">12.61</div></div><div class="alpha-desc">Chauffage dominant</div></div>
+        <div class="alpha-row"><div><div style="font-size:9px;color:#7a4a5a;">α_haut</div><div style="font-size:13px;font-weight:500;color:#9b72f5;">1.76</div></div><div class="alpha-desc">Effet secondaire</div></div>
+        <div class="alpha-row"><div><div style="font-size:9px;color:#7a4a5a;">T_final</div><div style="font-size:13px;font-weight:500;color:#3ecfa8;">= 200°C</div></div><div class="alpha-desc">Température optimale</div></div>
+        <div class="alpha-row"><div><div style="font-size:9px;color:#7a4a5a;">PCG T1</div><div style="font-size:12px;font-weight:500;color:#5b9ef5;">26 iter</div></div><div class="alpha-desc">IC(0) préconditionneur</div></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;"><div><div style="font-size:9px;color:#7a4a5a;">PCG T2</div><div style="font-size:12px;font-weight:500;color:#5b9ef5;">26 iter</div></div><div class="alpha-desc" style="font-size:10px;color:#a07060;">Convergence identique</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row3">
+
+    <div class="card" style="border-top:3px solid #5f5e5a;">
+      <div class="sec-label">Structures de données</div>
+      <div class="struct-item"><span class="struct-name" style="color:#f5c842;">mat_profil</span><span class="struct-desc">INDIAG + ATAB — stockage profil Poisson 1D</span></div>
+      <div class="struct-item"><span class="struct-name" style="color:#3ecfa8;">mat_bande</span><span class="struct-desc">IND + TAB 2D — matrice bande tridiagonale</span></div>
+      <div class="struct-item"><span class="struct-name" style="color:#9b72f5;">matricebande</span><span class="struct-desc">IND + ATAB — classe C++ Laplacien 2D</span></div>
+      <div class="struct-item"><span class="struct-name" style="color:#e05c7a;">LDL^T</span><span class="struct-desc">Crout symétrique — factorisation Poisson</span></div>
+      <div class="struct-item"><span class="struct-name" style="color:#5b9ef5;">LU tridiag</span><span class="struct-desc">factorisation — chaleur &amp; Black-Scholes</span></div>
+      <div class="struct-item" style="border:none;"><span class="struct-name" style="color:#e8943a;">PCG + IC(0)</span><span class="struct-desc">gradient conjugué préconditionné 2D</span></div>
+    </div>
+
+    <div class="card" style="border-top:3px solid #8b4513;">
+      <div class="sec-label">Synthèse des taux de convergence</div>
+      <table class="convergence-table">
+        <tr><th>Problème</th><th>Paramètre</th><th>β exp.</th><th>Ordre théo.</th></tr>
+        <tr><td style="color:#f0e6d3;">Poisson 1D</td><td class="ct-param">α=0</td><td class="ct-beta">−0.943</td><td class="ct-ord">O(h²) asy.</td></tr>
+        <tr><td style="color:#f0e6d3;">Poisson 1D</td><td class="ct-param">α=10</td><td class="ct-beta">−0.904</td><td class="ct-ord">O(h²) asy.</td></tr>
+        <tr><td style="color:#f0e6d3;">Chaleur Expl.</td><td class="ct-param">T=1</td><td class="ct-beta">−1.738</td><td class="ct-ord">O(k+h²)</td></tr>
+        <tr><td style="color:#f0e6d3;">Chaleur Impl.</td><td class="ct-param">T=1</td><td class="ct-beta">−1.766</td><td class="ct-ord">O(k+h²)</td></tr>
+      </table>
+      <div style="margin-top:10px;font-size:10px;color:#7a4a5a;border-top:1px solid #2a1020;padding-top:8px;">Condition stabilité Euler explicite</div>
+      <div style="font-size:12px;font-weight:500;color:#e8943a;margin:4px 0;">k &lt; h² / (2‖ν‖∞)</div>
+      <div style="font-size:10px;color:#a07060;">ν(x)=1 (x&lt;0.5) · ν(x)=10 (x≥0.5)</div>
+    </div>
+
+    <div class="card" style="border-top:3px solid #9b72f5;">
+      <div class="sec-label">Résumé du projet</div>
+      <div class="sum-grid">
+        <div class="sum-card"><div class="sum-pct" style="color:#f5c842;">100%</div><div class="sum-name">Poisson 1D</div></div>
+        <div class="sum-card"><div class="sum-pct" style="color:#3ecfa8;">100%</div><div class="sum-name">Chaleur 1D</div></div>
+        <div class="sum-card"><div class="sum-pct" style="color:#e8943a;">100%</div><div class="sum-name">Black-Scholes</div></div>
+        <div class="sum-card"><div class="sum-pct" style="color:#9b72f5;">100%</div><div class="sum-name">Méth. itérat.</div></div>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="kv" style="margin-bottom:3px;"><span class="kv-label">Langage</span><span style="font-size:11px;color:#f0e6d3;">C++17 + Python</span></div>
+        <div class="kv" style="margin-bottom:3px;"><span class="kv-label">Librairies</span><span style="font-size:11px;color:#f0e6d3;">STL vector, matplotlib</span></div>
+        <div class="kv" style="margin-bottom:3px;"><span class="kv-label">Code source</span><span style="font-size:11px;color:#5b9ef5;">GitHub (Hoangviet1810)</span></div>
+        <div class="kv"><span class="kv-label">Auteur</span><span style="font-size:11px;color:#f0e6d3;">Duc Hoang Viet Nguyen</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const gOpts = (xl,yl) => ({
+  responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#7a4a5a',font:{size:9}},title:{display:!!xl,text:xl,color:'#7a4a5a',font:{size:9}}},
+    y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#7a4a5a',font:{size:9}},title:{display:!!yl,text:yl,color:'#7a4a5a',font:{size:9}}}
+  }
+});
+
+const Ns=[4,8,16,32,64,128,256,512,1024];
+const lN=Ns.map(n=>Math.log(n).toFixed(1));
+const lE0=Ns.map((n,i)=>[0.644,0.482,0.306,0.173,0.092,0.049,0.026,0.014,0.007][i]);
+const lE0log=lE0.map(e=>Math.log(e).toFixed(3));
+
+new Chart(document.getElementById('c1'),{
+  type:'line',
+  data:{labels:lN,datasets:[
+    {data:lE0log,borderColor:'#f5c842',backgroundColor:'rgba(245,200,66,0.08)',pointRadius:3,pointBackgroundColor:'#f5c842',borderWidth:1.5,fill:true},
+    {data:lN.map((x,i)=>(-2*parseFloat(x)+1.5).toFixed(2)),borderColor:'#e05c7a',borderDash:[4,3],pointRadius:0,borderWidth:1}
+  ]},
+  options:gOpts('log(N)','log(ε)')
+});
+
+const Nsc=[4,8,16,32,64,128,256];
+const eE=[0.453,0.192,0.061,0.017,0.0046,0.0013,0.00036];
+const eI=[0.449,0.192,0.062,0.018,0.0047,0.0013,0.00037];
+new Chart(document.getElementById('c2'),{
+  type:'line',
+  data:{labels:Nsc,datasets:[
+    {data:eE,borderColor:'#3ecfa8',backgroundColor:'rgba(62,207,168,0.08)',pointRadius:3,pointBackgroundColor:'#3ecfa8',borderWidth:1.5,fill:true},
+    {data:eI,borderColor:'#e8943a',backgroundColor:'rgba(232,148,58,0.08)',pointRadius:3,pointBackgroundColor:'#e8943a',borderWidth:1.5,fill:true,borderDash:[4,3]}
+  ]},
+  options:{...gOpts('N','erreur max'),scales:{...gOpts().scales,
+    x:{...gOpts().scales.x,type:'logarithmic',ticks:{color:'#7a4a5a',font:{size:9},callback:v=>Number.isInteger(Math.log2(v))?v:null}},
+    y:{...gOpts().scales.y,type:'logarithmic',ticks:{color:'#7a4a5a',font:{size:9}}}
+  }}
+});
+
+const bsX=[0,100,200,300,400,500,1000,2000,3000,5000,8000,10000];
+const bsU=[0,1.52,2.51,3.29,3.94,4.51,7.2,9.5,10.8,11.9,12.9,13.35];
+const pyf=bsX.map(x=>Math.max(x-0.95*x,0).toFixed(2));
+new Chart(document.getElementById('c3'),{
+  type:'line',
+  data:{labels:bsX,datasets:[
+    {data:bsU,borderColor:'#e8943a',backgroundColor:'rgba(232,148,58,0.12)',pointRadius:2,borderWidth:2,fill:true},
+    {data:pyf,borderColor:'#5b9ef5',borderDash:[4,3],pointRadius:0,borderWidth:1}
+  ]},
+  options:{...gOpts('x','U(T,x)'),scales:{...gOpts().scales,
+    x:{...gOpts().scales.x,ticks:{color:'#7a4a5a',font:{size:9},maxTicksLimit:5}},
+    y:{...gOpts().scales.y,ticks:{color:'#7a4a5a',font:{size:9}}}
+  }}
+});
+
+new Chart(document.getElementById('c4'),{
+  type:'bar',
+  data:{
+    labels:['j=1','j=2','j=3','j=4','j=5','j=6','Steep.'],
+    datasets:[{data:[150,150,122,91,72,150,66],backgroundColor:['#7a4a5a','#7a4a5a','#e8943a','#e8943a','#3ecfa8','#e05c7a','#f5c842'],borderRadius:3}]
+  },
+  options:{...gOpts('','iter.'),plugins:{legend:{display:false}}}
+});
+</script>

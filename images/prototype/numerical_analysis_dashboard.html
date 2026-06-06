@@ -1,0 +1,291 @@
+
+<h2 class="sr-only">Dashboard de visualisation du projet d'analyse numérique en C++ : convergence de Poisson, équation de la chaleur, Black-Scholes et méthodes itératives PCG.</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.dashboard { padding: 1rem 0; display: flex; flex-direction: column; gap: 1.5rem; }
+.section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.metric-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.metric-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+.chart-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; font-size: 11px; color: var(--color-text-secondary); }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.row { display: flex; flex-direction: column; gap: 1.5rem; }
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); }
+.tag-purple { background: #EEEDFE; color: #3C3489; }
+.tag-teal { background: #E1F5EE; color: #0F6E56; }
+.tag-amber { background: #FAEEDA; color: #854F0B; }
+.tag-coral { background: #FAECE7; color: #993C1D; }
+.iter-bar-bg { background: var(--color-background-secondary); border-radius: 4px; height: 10px; width: 100%; overflow: hidden; }
+.iter-bar { height: 10px; border-radius: 4px; }
+</style>
+
+<div class="dashboard">
+
+  <!-- ROW 1: Poisson convergence metrics + chart -->
+  <div>
+    <div class="section-label">1 — Poisson 1D · convergence par différences finies</div>
+    <div class="grid-3" style="margin-bottom: 12px;">
+      <div class="metric-card">
+        <div class="metric-label">Ordre convergence (α=0)</div>
+        <div class="metric-value">β ≈ 0.94</div>
+        <div class="metric-sub">constante C ≈ 3.87</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Ordre convergence (α=10)</div>
+        <div class="metric-value">β ≈ 0.90</div>
+        <div class="metric-sub">constante C ≈ 2.81</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Erreur max (N=64, α=0)</div>
+        <div class="metric-value">0.092</div>
+        <div class="metric-sub">ordre théorique cible: β=2</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chart-title">Convergence log-log : ε<sub>N</sub> en fonction de N</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#534AB7"></div>α = 0</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div>α = 10</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#888780; width:18px; height:2px; border-radius:0;"></div>pente -2 (théorique)</div>
+      </div>
+      <div style="position:relative;width:100%;height:200px;">
+        <canvas id="poissonChart" role="img" aria-label="Convergence log-log de l'erreur Poisson 1D pour alpha=0 et alpha=10, pente expérimentale ~0.94">Données de convergence Poisson 1D.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Chaleur charts side by side -->
+  <div>
+    <div class="section-label">2 — Équation de la chaleur · Euler explicite vs implicite (T=1, ν variable)</div>
+    <div class="grid-3" style="margin-bottom: 12px;">
+      <div class="metric-card">
+        <div class="metric-label">Taux convergence explicite</div>
+        <div class="metric-value">β ≈ 1.74</div>
+        <div class="metric-sub">C ≈ 6.39</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Taux convergence implicite</div>
+        <div class="metric-value">β ≈ 1.77</div>
+        <div class="metric-sub">C ≈ 6.89</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Stabilité implicite</div>
+        <div class="metric-value">k = h</div>
+        <div class="metric-sub">explicite : k &lt; h²/(2‖ν‖∞)</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="chart-title">Erreur max vs N — Euler explicite</div>
+        <div style="position:relative;width:100%;height:180px;">
+          <canvas id="chaleurExplChart" role="img" aria-label="Erreur maximale méthode explicite vs N">Données chaleur explicite.</canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Erreur max vs N — Euler implicite</div>
+        <div style="position:relative;width:100%;height:180px;">
+          <canvas id="chaleurImplChart" role="img" aria-label="Erreur maximale méthode implicite vs N">Données chaleur implicite.</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Black-Scholes -->
+  <div>
+    <div class="section-label">3 — Black-Scholes · option call européen (σ=0.2, T=365, L=10000)</div>
+    <div class="grid-3" style="margin-bottom: 12px;">
+      <div class="metric-card">
+        <div class="metric-label">Prix option (S=500)</div>
+        <div class="metric-value">4.51</div>
+        <div class="metric-sub">U(T, 500) unités monétaires</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Prix option (S=10 000)</div>
+        <div class="metric-value">13.35</div>
+        <div class="metric-sub">U(T, 10000) — bord Neumann</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Strike K(x)</div>
+        <div class="metric-value">0.95·x</div>
+        <div class="metric-sub">payoff = max(x−K, 0)</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chart-title">Profil de prix U(T, x) au temps final — coupe spatiale</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#D85A30"></div>U(T, x) calculé</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#B4B2A9; width:18px; height:2px; border-radius:0; border-top: 2px dashed #888780;"></div>payoff initial h(x)</div>
+      </div>
+      <div style="position:relative;width:100%;height:200px;">
+        <canvas id="bsChart" role="img" aria-label="Profil de prix option call européen en fonction du prix sous-jacent">Prix option call Black-Scholes.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Méthodes itératives PCG -->
+  <div>
+    <div class="section-label">4 — Méthodes itératives · PCG avec préconditionneurs (N=20)</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="chart-title">Nombre d'itérations PCG — cas ρ=1 (Laplacien standard)</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="color:var(--color-text-secondary)">C = I</span><span class="tag tag-coral">62 iter.</span>
+            </div>
+            <div class="iter-bar-bg"><div class="iter-bar" style="width:100%;background:#D85A30;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="color:var(--color-text-secondary)">C = diag(A)</span><span class="tag tag-amber">59 iter.</span>
+            </div>
+            <div class="iter-bar-bg"><div class="iter-bar" style="width:95%;background:#EF9F27;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="color:var(--color-text-secondary)">C = IC(0)</span><span class="tag tag-teal">23 iter.</span>
+            </div>
+            <div class="iter-bar-bg"><div class="iter-bar" style="width:37%;background:#1D9E75;"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chart-title">Nombre d'itérations PCG — cas ρ variable (gâteau)</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="color:var(--color-text-secondary)">C = I</span><span class="tag tag-coral">248 iter.</span>
+            </div>
+            <div class="iter-bar-bg"><div class="iter-bar" style="width:100%;background:#D85A30;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="color:var(--color-text-secondary)">C = diag(A)</span><span class="tag tag-amber">83 iter.</span>
+            </div>
+            <div class="iter-bar-bg"><div class="iter-bar" style="width:33%;background:#EF9F27;"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+              <span style="color:var(--color-text-secondary)">C = IC(0)</span><span class="tag tag-teal">26 iter.</span>
+            </div>
+            <div class="iter-bar-bg"><div class="iter-bar" style="width:10%;background:#1D9E75;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="chart-title">Gradient à pas fixe vs steepest descent — nombre d'itérations</div>
+      <div style="position:relative;width:100%;height:180px;">
+        <canvas id="gradChart" role="img" aria-label="Comparaison itérations gradient pas fixe vs steepest descent">Comparaison méthodes gradient.</canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+const textColor = isDark ? '#aaa' : '#666';
+
+const baseOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+  scales: {
+    x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
+    y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } }
+  }
+};
+
+const Ns = [4, 8, 16, 32, 64, 128, 256, 512, 1024];
+const logN = Ns.map(n => Math.log(n).toFixed(2));
+
+const errAlpha0 = [0.644, 0.482, 0.306, 0.173, 0.092, 0.049, 0.026, 0.014, 0.007];
+const errAlpha10 = [0.374, 0.339, 0.255, 0.158, 0.088, 0.047, 0.024, 0.012, 0.006];
+const logE0 = errAlpha0.map(e => Math.log(e).toFixed(3));
+const logE10 = errAlpha10.map(e => Math.log(e).toFixed(3));
+const theorLine = logN.map((x, i) => (-2 * parseFloat(x) + 1.5).toFixed(3));
+
+new Chart(document.getElementById('poissonChart'), {
+  type: 'line',
+  data: {
+    labels: logN,
+    datasets: [
+      { label: 'α=0', data: logE0, borderColor: '#534AB7', backgroundColor: 'transparent', pointRadius: 4, pointBackgroundColor: '#534AB7', borderWidth: 2 },
+      { label: 'α=10', data: logE10, borderColor: '#1D9E75', backgroundColor: 'transparent', pointRadius: 4, pointBackgroundColor: '#1D9E75', borderWidth: 2 },
+      { label: 'Ordre 2', data: theorLine, borderColor: '#888780', backgroundColor: 'transparent', borderDash: [5, 4], pointRadius: 0, borderWidth: 1.5 }
+    ]
+  },
+  options: { ...baseOpts, scales: { ...baseOpts.scales, x: { ...baseOpts.scales.x, title: { display: true, text: 'log(N)', color: textColor, font: { size: 11 } } }, y: { ...baseOpts.scales.y, title: { display: true, text: 'log(εN)', color: textColor, font: { size: 11 } } } } }
+});
+
+const NsSmall = [4, 8, 16, 32, 64, 128, 256];
+const errExpl = [0.453, 0.192, 0.061, 0.017, 0.0046, 0.0013, 0.00036];
+const errImpl = [0.449, 0.192, 0.062, 0.018, 0.0047, 0.0013, 0.00037];
+
+const chaleurBaseOpts = {
+  ...baseOpts,
+  scales: {
+    x: { ...baseOpts.scales.x, type: 'logarithmic', title: { display: true, text: 'N', color: textColor, font: { size: 11 } }, ticks: { color: textColor, font: { size: 10 }, callback: v => Number.isInteger(Math.log2(v)) ? v : null } },
+    y: { ...baseOpts.scales.y, type: 'logarithmic', title: { display: true, text: 'erreur max', color: textColor, font: { size: 11 } }, ticks: { color: textColor, font: { size: 10 } } }
+  }
+};
+
+new Chart(document.getElementById('chaleurExplChart'), {
+  type: 'line',
+  data: { labels: NsSmall, datasets: [{ label: 'Euler explicite', data: errExpl, borderColor: '#7F77DD', backgroundColor: 'rgba(127,119,221,0.1)', pointRadius: 4, pointBackgroundColor: '#7F77DD', borderWidth: 2, fill: true }] },
+  options: chaleurBaseOpts
+});
+
+new Chart(document.getElementById('chaleurImplChart'), {
+  type: 'line',
+  data: { labels: NsSmall, datasets: [{ label: 'Euler implicite', data: errImpl, borderColor: '#1D9E75', backgroundColor: 'rgba(29,158,117,0.1)', pointRadius: 4, pointBackgroundColor: '#1D9E75', borderWidth: 2, fill: true }] },
+  options: chaleurBaseOpts
+});
+
+const bsX = [0,50,100,150,200,250,300,350,400,450,500,1000,2000,3000,5000,7000,9950,10000];
+const bsU = [0,0.88,1.52,2.05,2.51,2.92,3.29,3.63,3.94,4.24,4.51,7.2,9.5,10.8,11.9,12.7,13.35,13.35];
+const payoff = bsX.map(x => Math.max(x - 0.95 * x, 0));
+
+new Chart(document.getElementById('bsChart'), {
+  type: 'line',
+  data: {
+    labels: bsX,
+    datasets: [
+      { label: 'U(T,x)', data: bsU, borderColor: '#D85A30', backgroundColor: 'rgba(216,90,48,0.1)', pointRadius: 2, borderWidth: 2, fill: true },
+      { label: 'Payoff initial', data: payoff, borderColor: '#888780', backgroundColor: 'transparent', borderDash: [4, 3], pointRadius: 0, borderWidth: 1.5 }
+    ]
+  },
+  options: { ...baseOpts, scales: { ...baseOpts.scales, x: { ...baseOpts.scales.x, title: { display: true, text: 'prix sous-jacent x', color: textColor, font: { size: 11 } }, ticks: { color: textColor, font: { size: 10 }, maxTicksLimit: 8 } }, y: { ...baseOpts.scales.y, title: { display: true, text: 'valeur option', color: textColor, font: { size: 11 } } } } }
+});
+
+new Chart(document.getElementById('gradChart'), {
+  type: 'bar',
+  data: {
+    labels: ['α₁=0.003', 'α₂=0.006', 'α₃=0.009', 'α₄=0.013', 'α₅=0.016', 'α₆=0.019', 'Steepest\ndescent'],
+    datasets: [{
+      label: 'Itérations',
+      data: [150, 150, 122, 91, 72, 150, 66],
+      backgroundColor: ['#F09595','#FAC775','#EF9F27','#5DCAA5','#1D9E75','#E24B4A','#534AB7'],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    ...baseOpts,
+    scales: {
+      x: { ...baseOpts.scales.x, ticks: { ...baseOpts.scales.x.ticks, maxRotation: 0 } },
+      y: { ...baseOpts.scales.y, max: 170, title: { display: true, text: 'nb itérations', color: textColor, font: { size: 11 } } }
+    },
+    plugins: { legend: { display: false }, annotation: {} }
+  }
+});
+</script>
