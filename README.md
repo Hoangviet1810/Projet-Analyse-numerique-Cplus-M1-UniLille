@@ -116,4 +116,8 @@ project/
 └── README.md
 ```
 
-![Dashboard](images/dashboard_analyse_numerique.png)
+### Interactive Dashboard
+
+[![Dashboard](images/dashboard_analyse_numerique.png)](https://hoangviet1810.github.io/Projet-Analyse-numerique-Cplus-M1-UniLille/images/dashboard.html)
+
+➡️ Click on the image to open the interactive dashboard.
