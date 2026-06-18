@@ -1,3 +1,44 @@
+
+<div align="center">
+  <h1>Projet d’Analyse Numérique en C++</h1>
+  <p><em>M1 — Université de Lille | Résolution numérique d’EDP classiques</em></p>
+
+  <a href="#">
+    <img src="https://img.shields.io/badge/C++-17-00599C?logo=c%2B%2B&logoColor=white&style=flat-square">
+  </a>
+  
+  <a href="#">
+    <img src="https://img.shields.io/badge/CMake-3.10+-064F8C?logo=cmake&logoColor=white&style=flat-square">
+  </a>
+
+  <a href="#">
+    <img src="https://img.shields.io/badge/Numerical-Analysis-orange?style=flat-square">
+  </a>
+
+  <a href="#">
+    <img src="https://img.shields.io/badge/PDE-Poisson%20%7C%20Heat%20%7C%20Black--Scholes-blueviolet?style=flat-square">
+  </a>
+
+  <a href="#">
+    <img src="https://img.shields.io/badge/Finite-Differences-green?style=flat-square">
+  </a>
+
+  <a href="#">
+    <img src="https://img.shields.io/badge/Status-Completed-brightgreen?style=flat-square">
+  </a>
+
+  <a href="https://hoangviet1810.github.io/Projet-Analyse-numerique-Cplus-M1-UniLille/images/dashboard.html">
+    <img src="https://img.shields.io/badge/Demo-Interactive_Dashboard-red?style=flat-square">
+  </a>
+
+  <a href="#">
+    <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square">
+  </a>
+</div>
+
+<br>
+
+
 # Projet Analyse numerique avec C++ M1-Université de Lille
 
 Ce projet présente la mise en œuvre de différentes méthodes numériques en C++ pour la résolution d’équations différentielles partielles classiques, avec discrétisation par différences finies et résolution de systèmes linéaires.
